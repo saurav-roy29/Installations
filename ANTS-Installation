@@ -1,0 +1,91 @@
+--------------------------
+Installation ReadMe - ANTs
+--------------------------
+
+Open a command window and run the following command to replace the git protocol to use https instead of git for all of your projects.
+
+$> git config --global url."https://".insteadOf git://
+
+Create Download Directory for ANTs
+$> sudo mkdir <DownloadDirectoryPath>
+
+Open Download Directory and Download ANTs Repository
+
+$> cd <DownloadDirectoryPath>
+$> git clone https://github.com/stnava/ANTs.git
+
+Create ANTs Installation Directory
+
+$> sudo mkdir -p /usr/bin/ants
+
+Change to ANTs Installation Directory and Run CMake to Configure ANTs Build
+
+$> cd /usr/bin/ants
+$> sudo ccmake <DownloadDirectoryPath>/ANTs
+
+* NOTE: You may have to install ccmake using
+$> sudo apt-get install ccmake
+$> sudo apt-get install cmake-curses-gui
+
+On Running ccmake, hit 'c' to do an initial configuration. CMake will do some checking and then present options for review.
+
+If you are behind a firewall that blocks the git protocol, set the setting for SuperBuild_ANTS_USE_GIT_PROTOCOL to "OFF".
+
+Hit 'c' again to do another round of configuration. If there are no errors, then you're ready to generate the make files by pressing 'g'.
+
+Find the number of processors on your system using
+
+$> nproc
+
+Now that you are back at the command line, it's time to compile the ANTs build.
+
+$> sudo make -j <NumberOfProcessors>
+
+This compiles by using multiple threads to save time. To compile in the most resource-efficient manner, you can use:
+
+$> sudo make
+
+If your build seems slow for the number of threads, exits with errors, or hangs up entirely, try building with a single thread.
+
+The system will build ITK and then ANTs. Using these default settings, installation will take approximately 40 minutes. You can speed it up by turning off RUN_LONG_TESTS, or by turning off testing entirely.
+
+Copy ANTs Scripts to Installation Directory
+
+$> sudo cp <DownloadDirectoryPath>/ANTs/Scripts/* /usr/bin/ants/bin/
+
+Set the environment variables for the ANTs build in the .bashrc file. Open a new command window and type in:
+
+$> sudo nano .bashrc
+
+Add the following at the end of the .bashrc file.
+
+# For ANTs Build
+ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=<NumberOfProcessors>
+export ANTSPATH=/usr/bin/ants/bin/
+export PATH=${ANTSPATH}:$PATH
+
+Exit the .bashrc file (Ctrl+X) and save the settings.
+
+Check if this has worked correctly by typing the following in a new terminal window:
+
+$> which antsRegistration
+
+This command should print out the full path to antsRegistration, and
+
+$> antsRegistrationSyN.sh
+
+should print out the usage for the antsRegistrationSyN.sh script.
+
+*Note:
+
+If the build hangs while attempting to download code, it may be because the Git protocol is blocked by a firewall. Run ccmake again and set
+
+SuperBuild_ANTS_USE_GIT_PROTOCOL to "OFF".
+
+If the build hangs during compilation of some code, it's probably because the build is running out of RAM. You can reduce memory burden by compiling with fewer threads. Disabling testing may also help, set BUILD_TESTING to OFF in CMake. Alternatively, you can increase the memory available to the build process.
+
+To start afresh at any point, you can remove the older files in the installation directory by typing:
+
+$> sudo rm -r /usr/bin/ants/*
+
+and start the process from the top.
